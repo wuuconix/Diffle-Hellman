@@ -1,16 +1,23 @@
-from pydoc import cli
 import socket
 
 
-class Client:
-    def __init__(self, addr, port):
+class Client(object):
+    """客户端套接字封装
+
+    Attributes:
+        __client: 客户端套接字
+    """
+
+    def __init__(self, addr: str, port: int):
         self.__client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__client.connect((addr, port))
 
-    def send_msg(self, msg):
+    def send(self, msg: bytes) -> None:
+        """发送数据"""
         self.__client.send(msg)
 
-    def recv_msg(self, size=1024):
+    def recv(self, size: int = 1024) -> bytes:
+        """接受数据"""
         return self.__client.recv(size)
 
     def __del__(self):
@@ -19,4 +26,4 @@ class Client:
 
 if __name__ == '__main__':
     client = Client('localhost', 23333)
-    client.send_msg('hello'.encode())
+    client.send('hello'.encode())
