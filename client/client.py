@@ -25,10 +25,7 @@ class Client(object):
     def run(self) -> None:
         """通过DH密钥传输协议进行数据加密传输"""
         K = self.__key_exchange()
-        K = str(K) #先将K转化为字符
-        if (len(K) % 8 != 0): #确保K的字符长度为8的倍数
-            K = K + (8 - (len(K) % 8)) * "0"
-        K = K.encode() #转变为bytes类型
+        K = self.__key_format(K)
         while True:
             plaintext = input("input something to send: ").encode()
             ciphertext = aes_encrypt(plaintext, K)
@@ -74,8 +71,15 @@ class Client(object):
         return K
     
     def __random_integer(self) -> int:
-        """随机得到一个30位的整数"""
+        """随机得到一个100位的整数"""
         return getRandomInteger(100)
+
+    def __key_format(self, K: int) -> bytes:
+        K = str(K) #先将K转化为字符
+        if (len(K) % 8 != 0): #确保K的字符长度为8的倍数
+            K = K + (8 - (len(K) % 8)) * "0"
+        K = K.encode() #转变为bytes类型
+        return K
 
 if __name__ == '__main__':
     client = Client('localhost', 23333)

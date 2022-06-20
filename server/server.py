@@ -1,6 +1,7 @@
 import socket
 import json
 from Crypto.Util.number import getPrime, getRandomInteger
+from numpy import byte
 from aes import aes_decrypt, aes_encrypt
 
 class Server(object):
@@ -10,12 +11,12 @@ class Server(object):
         __server: 服务端套接字
     """
 
-    def __init__(self, addr: str, port: int, conn_count: int = 5):
+    def __init__(self, addr: str, port: int, conn_count: int = 1):
         self.__server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__server.bind((addr, port))
         self.__server.listen(conn_count)
 
-        print(f'listening: {addr}:{port}')
+        print(f'Listening: {addr}:{port}')
 
     def send(self, conn, msg: dict) -> None:
         """将传入的json对象转化为字节后发送"""
@@ -28,39 +29,41 @@ class Server(object):
 
     def run(self) -> None:
         """启动DH密钥交换和数据加密传输服务"""
-        while True:
-            conn, _ = self.__server.accept()
-            K = self.__key_exchange(conn)
-            K = str(K) #先将K转化为字符
-            if (len(K) % 8 != 0): #确保K的字符长度为8的倍数
-                K = K + (8 - (len(K) % 8)) * "0"
-            K = K.encode() #转变为bytes类型
-            while True: #不断和客户端通信
-                msg = self.recv(conn)
-                print("got client encryped msg:\n", msg)
-                ciphertext = msg["body"]["msg"].encode()
-                decryptdata = aes_decrypt(ciphertext, K).decode()
-                print("decrypt msg:", decryptdata)
-                plaintext = input("input something to respond: ").encode()
-                ciphertext = aes_encrypt(plaintext, K)
-                msg = {
-                    "status": 3,
-                    "body": {
-                        "msg": ciphertext.decode()
-                    }
+        conn, _ = self.__server.accept()
+        K = self.__key_exchange(conn)
+        K = self.__key_format(K)
+        while True: #不断和客户端通信
+            msg = self.recv(conn)
+            print("got client encryped msg:\n", msg)
+            ciphertext = msg["body"]["msg"].encode()
+            decryptdata = aes_decrypt(ciphertext, K).decode()
+            print("decrypt msg:", decryptdata)
+            plaintext = input("input something to respond: ").encode()
+            ciphertext = aes_encrypt(plaintext, K)
+            msg = {
+                "status": 3,
+                "body": {
+                    "msg": ciphertext.decode()
                 }
-                self.send(conn, msg)
-                print("send to client data:\n", msg)
+            }
+            self.send(conn, msg)
+            print("send to client data:\n", msg)
 
     def __key_exchange(self, conn) -> int:
         """密钥交换过程 返回对称密钥K"""
+        print("********DH Key Exchange********")
         msg = self.recv(conn)
         if (msg["status"] == 0):
-            print("got client hello\n", msg)
+            print("Got Client Hello\n")
+        input("Type Enter To Generate Big Prime p, Primitve Root g and Server Private Key a...\n")
         p = self.__prime()
         g = self.__primitive_root(p)
         a = self.__random_integer()
         A = pow(g, a, p)
+        print(f"Big Prime P: {p}\n")
+        print(f"Server Private Key a: {a}\n")
+        print(f"Server Public Key A: {A}\n")
+        input("Type Enter To Send Server Public Key A To Client And Waiting For Client Public Key...\n")
         msg = {
             "status": 1,
             "body": {
@@ -70,17 +73,18 @@ class Server(object):
             }
         }
         self.send(conn, msg)
-        print("sent server public key, p and g\n", msg)
         res = self.recv(conn)
-        print("got client public key\n", res)
         B = res["body"]["B"]
+        print(f"Client Public Key B: {B}\n")
         K = pow(B, a, p)
-        print("caculate k: ", K)
+        input("Type Enter To Calcu Final Key K...\n")
+        print("Final Key K: ", K)
+        print("******Done DH Key Exchange******")
         return K
 
     def __prime(self) -> int:
-        """随机得到一个100位的素数"""
-        return getPrime(100)
+        """随机得到一个300位的素数"""
+        return getPrime(300)
 
     def __primitive_root(self, p: int) -> int:
         """求素数p的最小原根"""
@@ -91,8 +95,15 @@ class Server(object):
         return -1
 
     def __random_integer(self) -> int:
-        """随机得到一个30位的整数"""
+        """随机得到一个100位的整数"""
         return getRandomInteger(100)
+
+    def __key_format(self, K: int) -> bytes:
+        K = str(K) #先将K转化为字符
+        if (len(K) % 8 != 0): #确保K的字符长度为8的倍数
+            K = K + (8 - (len(K) % 8)) * "0"
+        K = K.encode() #转变为bytes类型
+        return K
 
 if __name__ == '__main__':
     server = Server('localhost', 23333)
