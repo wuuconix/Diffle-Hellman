@@ -1,2 +1,4 @@
 /Diffle-Hellman/
 /__pycache__/
+client/__pycache__/
+server/__pycache__/
