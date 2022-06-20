@@ -23,6 +23,9 @@ class Client(object):
 
     def run(self) -> None:
         """通过DH密钥传输协议进行数据加密传输"""
+        K = self.__key_exchange()
+
+    def __key_exchange(self) -> int:
         msg = {
             "status": 0,
             "body": {
@@ -46,7 +49,8 @@ class Client(object):
         print("sent client public key\n", msg)
         K = pow(A, b, p)
         print("calculate k: ", K)
-
+        return K
+    
     def __random_integer(self) -> int:
         """随机得到一个30位的整数"""
         return getRandomInteger(100)

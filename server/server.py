@@ -29,28 +29,33 @@ class Server(object):
         """启动DH密钥交换和数据加密传输服务"""
         while True:
             conn, _ = self.__server.accept()
-            msg = self.recv(conn)
-            if (msg["status"] == 0):
-                print("got client hello\n", msg)
-            p = self.__prime()
-            g = self.__primitive_root(p)
-            a = self.__random_integer()
-            A = pow(g, a, p)
-            msg = {
-                "status": 1,
-                "body": {
-                    "p": p,
-                    "g": g,
-                    "A": A
-                }
+            K = self.__key_exchange(conn)
+  
+    def __key_exchange(self, conn) -> int:
+        """密钥交换过程 返回对称密钥K"""
+        msg = self.recv(conn)
+        if (msg["status"] == 0):
+            print("got client hello\n", msg)
+        p = self.__prime()
+        g = self.__primitive_root(p)
+        a = self.__random_integer()
+        A = pow(g, a, p)
+        msg = {
+            "status": 1,
+            "body": {
+                "p": p,
+                "g": g,
+                "A": A
             }
-            self.send(conn, msg)
-            print("sent server public key, p and g\n", msg)
-            res = self.recv(conn)
-            print("got client public key\n", res)
-            B = res["body"]["B"]
-            K = pow(B, a, p)
-            print("caculate k: ", K)
+        }
+        self.send(conn, msg)
+        print("sent server public key, p and g\n", msg)
+        res = self.recv(conn)
+        print("got client public key\n", res)
+        B = res["body"]["B"]
+        K = pow(B, a, p)
+        print("caculate k: ", K)
+        return K
 
     def __prime(self) -> int:
         """随机得到一个100位的素数"""
