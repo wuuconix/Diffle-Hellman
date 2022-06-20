@@ -76,9 +76,9 @@ class Server(object):
         res = self.recv(conn)
         B = res["body"]["B"]
         print(f"Client Public Key B: {B}\n")
-        K = pow(B, a, p)
         input("Type Enter To Calcu Final Key K...\n")
-        print("Final Key K: ", K)
+        K = pow(B, a, p)
+        print(f"Final Key K: {K}\n" )
         print("******Done DH Key Exchange******")
         return K
 
