@@ -16,30 +16,38 @@ class Server(object):
 
         print(f'listening: {addr}:{port}')
 
-    def send(self, msg: bytes) -> None:
-        """发送数据, 短连接"""
-        conn, _ = self.__server.accept()
-        conn.send(msg)
-        conn.close()
+    def send(self, conn, msg: dict) -> None:
+        """将传入的json对象转化为字节后发送"""
+        conn.send(json.dumps(msg).encode())
 
-    def recv(self, size: int = 1024) -> bytes:
-        """接受数据, 短连接"""
-        conn, _ = self.__server.accept()
-        msg = conn.recv(size)
-        conn.close()
+    def recv(self, conn) -> dict:
+        """将接受的数据进行转化为json格式"""
+        msg = json.loads(conn.recv(1024).decode())
         return msg
 
     def run(self) -> None:
         """启动DH密钥交换和数据加密传输服务"""
         while True:
             conn, _ = self.__server.accept()
-            msg = json.loads(conn.recv(1024).decode())
+            msg = self.recv(conn)
             if (msg["status"] == 0):
-                print("start to exchage key")
+                print("got client hello\n", msg)
             p = self.__prime()
             g = self.__primitive_root(p)
             a = self.__random_integer()
-            A = 
+            A = pow(g, a, p)
+            msg = {
+                "status": 1,
+                "body": {
+                    "p": p,
+                    "g": g,
+                    "A": A
+                }
+            }
+            self.send(conn, msg)
+            print("sent server public key, p and g\n", msg)
+            res = self.recv(conn)
+            print("got client public key\n", res)
 
     def __prime(self) -> int:
         """随机得到一个100位的素数"""
