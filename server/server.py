@@ -1,4 +1,5 @@
 import socket
+import json
 
 
 class Server(object):
@@ -13,6 +14,8 @@ class Server(object):
         self.__server.bind((addr, port))
         self.__server.listen(conn_count)
 
+        print(f'listening: {addr}:{port}')
+
     def send(self, msg: bytes) -> None:
         """发送数据, 短连接"""
         conn, _ = self.__server.accept()
@@ -26,8 +29,23 @@ class Server(object):
         conn.close()
         return msg
 
+    def run(self) -> None:
+        """启动DH密钥交换和数据加密传输服务"""
+        while True:
+            conn, _ = self.__server.accept()
+            msg = conn.recv(1024)
+            print(json.loads(msg.decode()))
+            conn.close()
+
+    def __primitive_root(self, p: int) -> int:
+        """求素数p的最小原根"""
+        k = (p - 1) // 2
+        for i in range(2, p - 1):
+            if pow(i, k, p) != 1:
+                return i
+        return -1
+
 
 if __name__ == '__main__':
     server = Server('localhost', 23333)
-    while True:
-        print(server.recv().decode())
+    server.run()
