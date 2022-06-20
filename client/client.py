@@ -44,6 +44,8 @@ class Client(object):
         }
         self.send(msg)
         print("sent client public key\n", msg)
+        K = pow(A, b, p)
+        print("calculate k: ", K)
 
     def __random_integer(self) -> int:
         """随机得到一个30位的整数"""

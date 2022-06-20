@@ -48,6 +48,9 @@ class Server(object):
             print("sent server public key, p and g\n", msg)
             res = self.recv(conn)
             print("got client public key\n", res)
+            B = res["body"]["B"]
+            K = pow(B, a, p)
+            print("caculate k: ", K)
 
     def __prime(self) -> int:
         """随机得到一个100位的素数"""
