@@ -1,6 +1,6 @@
 import socket
 import json
-
+from Crypto.Util.number import getPrime, getRandomInteger
 
 class Server(object):
     """服务端套接字封装
@@ -33,9 +33,17 @@ class Server(object):
         """启动DH密钥交换和数据加密传输服务"""
         while True:
             conn, _ = self.__server.accept()
-            msg = conn.recv(1024)
-            print(json.loads(msg.decode()))
-            conn.close()
+            msg = json.loads(conn.recv(1024).decode())
+            if (msg["status"] == 0):
+                print("start to exchage key")
+            p = self.__prime()
+            g = self.__primitive_root(p)
+            a = self.__random_integer()
+            A = 
+
+    def __prime(self) -> int:
+        """随机得到一个100位的素数"""
+        return getPrime(100)
 
     def __primitive_root(self, p: int) -> int:
         """求素数p的最小原根"""
@@ -45,6 +53,9 @@ class Server(object):
                 return i
         return -1
 
+    def __random_integer(self) -> int:
+        """随机得到一个30位的整数"""
+        return getRandomInteger(100)
 
 if __name__ == '__main__':
     server = Server('localhost', 23333)
