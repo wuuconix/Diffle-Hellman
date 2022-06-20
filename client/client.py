@@ -45,6 +45,8 @@ class Client(object):
 
     def __key_exchange(self) -> int:
         """密钥交换过程 返回对称密钥K"""
+        print("********DH Key Exchange********")
+        input("Type Enter To Send Hello To Server...\n")
         msg = {
             "status": 0,
             "body": {
@@ -52,12 +54,17 @@ class Client(object):
             }
         }
         self.send(msg)
-        print("sent hello\n", msg)
+        print("Waiting For Server P, g, A...\n")
         res = self.recv()
-        print("got server public key, p and g\n", res)
         p, g, A = res["body"]["p"], res["body"]["g"], res["body"]["A"]
+        print(f"Big Prime P: {p}\n")
+        print(f"Server Public Key A: {A}\n")
+        input("Type Enter To Generate Client Private Key b...\n")
         b = self.__random_integer()
         B = pow(g, b, p)
+        print(f"Client Private Key b: {b}\n")
+        print(f"Client Public Key B: {B}\n")
+        input("Type Enter To Send Client Public Key B To Server...\n")
         msg = {
             "status": 2,
             "body": {
@@ -65,9 +72,10 @@ class Client(object):
             }
         }
         self.send(msg)
-        print("sent client public key\n", msg)
+        input("Type Enter To Calcu Final Key K...\n")
         K = pow(A, b, p)
-        print("calculate k: ", K)
+        print(f"Final Key K: {K}\n")
+        print("******Done DH Key Exchange******")
         return K
     
     def __random_integer(self) -> int:
