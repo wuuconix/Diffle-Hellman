@@ -1,6 +1,7 @@
 import socket
 import json
 from Crypto.Util.number import getPrime, getRandomInteger
+from aes import aes_decrypt, aes_encrypt
 
 class Server(object):
     """服务端套接字封装
@@ -30,7 +31,27 @@ class Server(object):
         while True:
             conn, _ = self.__server.accept()
             K = self.__key_exchange(conn)
-  
+            K = str(K) #先将K转化为字符
+            if (len(K) % 8 != 0): #确保K的字符长度为8的倍数
+                K = K + (8 - (len(K) % 8)) * "0"
+            K = K.encode() #转变为bytes类型
+            while True: #不断和客户端通信
+                msg = self.recv(conn)
+                print("got client encryped msg:\n", msg)
+                ciphertext = msg["body"]["msg"].encode()
+                decryptdata = aes_decrypt(ciphertext, K).decode()
+                print("decrypt msg:", decryptdata)
+                plaintext = input("input something to respond: ").encode()
+                ciphertext = aes_encrypt(plaintext, K)
+                msg = {
+                    "status": 3,
+                    "body": {
+                        "msg": ciphertext.decode()
+                    }
+                }
+                self.send(conn, msg)
+                print("send to client data:\n", msg)
+
     def __key_exchange(self, conn) -> int:
         """密钥交换过程 返回对称密钥K"""
         msg = self.recv(conn)
