@@ -1,7 +1,6 @@
 import socket
 import json
 from Crypto.Util.number import getPrime, getRandomInteger
-from numpy import byte
 from aes import aes_decrypt, aes_encrypt
 
 class Server(object):
@@ -32,14 +31,18 @@ class Server(object):
         conn, _ = self.__server.accept()
         K = self.__key_exchange(conn)
         K = self.__key_format(K)
+        print("*******Data Communication*******\n")
         while True: #不断和客户端通信
+            print("Wating For Client Msg...\n")
             msg = self.recv(conn)
-            print("got client encryped msg:\n", msg)
             ciphertext = msg["body"]["msg"].encode()
+            print(f"Client Ciphertext: {ciphertext.decode()}\n")
             decryptdata = aes_decrypt(ciphertext, K).decode()
-            print("decrypt msg:", decryptdata)
-            plaintext = input("input something to respond: ").encode()
+            print(f"Plaintext After Decrypt: {decryptdata}\n")
+            plaintext = input("Input Something To Respond: ").encode()
+            print("")
             ciphertext = aes_encrypt(plaintext, K)
+            print(f"Ciphertext: {ciphertext.decode()}\n")
             msg = {
                 "status": 3,
                 "body": {
@@ -47,7 +50,6 @@ class Server(object):
                 }
             }
             self.send(conn, msg)
-            print("send to client data:\n", msg)
 
     def __key_exchange(self, conn) -> int:
         """密钥交换过程 返回对称密钥K"""
@@ -79,7 +81,7 @@ class Server(object):
         input("Type Enter To Calcu Final Key K...\n")
         K = pow(B, a, p)
         print(f"Final Key K: {K}\n" )
-        print("******Done DH Key Exchange******")
+        print("******Done DH Key Exchange******\n")
         return K
 
     def __prime(self) -> int:
@@ -100,8 +102,7 @@ class Server(object):
 
     def __key_format(self, K: int) -> bytes:
         K = str(K) #先将K转化为字符
-        if (len(K) % 8 != 0): #确保K的字符长度为8的倍数
-            K = K + (8 - (len(K) % 8)) * "0"
+        K = K[0: 32] #取前32位字符
         K = K.encode() #转变为bytes类型
         return K
 

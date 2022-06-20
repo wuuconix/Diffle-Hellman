@@ -26,9 +26,12 @@ class Client(object):
         """通过DH密钥传输协议进行数据加密传输"""
         K = self.__key_exchange()
         K = self.__key_format(K)
+        print("*******Data Communication*******\n")
         while True:
-            plaintext = input("input something to send: ").encode()
+            plaintext = input("Input Something To Send: ").encode()
+            print("")
             ciphertext = aes_encrypt(plaintext, K)
+            print(f"Ciphertext: {ciphertext.decode()}\n")
             msg = {
                 "status": 3,
                 "body": {
@@ -36,12 +39,12 @@ class Client(object):
                 }
             }
             self.send(msg)
-            print("send to server data:\n", msg)
+            print("Wating For Server Response...\n")
             msg = self.recv()
-            print("got server encryped msg:\n", msg)
             ciphertext = msg["body"]["msg"].encode()
+            print(f"Server Ciphertext: {ciphertext.decode()}\n")
             decryptdata = aes_decrypt(ciphertext, K).decode()
-            print("decrypt msg:", decryptdata)
+            print(f"Plaintext After Decrypt: {decryptdata}\n")
 
     def __key_exchange(self) -> int:
         """密钥交换过程 返回对称密钥K"""
@@ -75,7 +78,7 @@ class Client(object):
         input("Type Enter To Calcu Final Key K...\n")
         K = pow(A, b, p)
         print(f"Final Key K: {K}\n")
-        print("******Done DH Key Exchange******")
+        print("******Done DH Key Exchange******\n")
         return K
     
     def __random_integer(self) -> int:
@@ -84,8 +87,7 @@ class Client(object):
 
     def __key_format(self, K: int) -> bytes:
         K = str(K) #先将K转化为字符
-        if (len(K) % 8 != 0): #确保K的字符长度为8的倍数
-            K = K + (8 - (len(K) % 8)) * "0"
+        K = K[0: 32] #取前32位字符
         K = K.encode() #转变为bytes类型
         return K
 
