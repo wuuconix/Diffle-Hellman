@@ -11,7 +11,7 @@ class Client:
         self.__client.send(msg)
 
     def recv_msg(self, size=1024):
-        return self.__client.recv(1024)
+        return self.__client.recv(size)
 
     def __del__(self):
         self.__client.close()
