@@ -1,7 +1,15 @@
 import socket
 import json
 from Crypto.Util.number import getPrime, getRandomInteger
-from aes import aes_decrypt, aes_encrypt
+import sys
+import os
+sys.path.append(f"{os.path.split(os.path.realpath(__file__))[0]}/../utils/")
+from AES import aes_encrypt, aes_decrypt
+from RSA import rsa_encrypt
+from CA import ca_sign, ca_verify
+
+PUBLIC_KEY_PATH = "key/public.pem"
+PRIVATE_KEY_PATH = "key/private.pem"
 
 class Server(object):
     """服务端套接字封装
@@ -14,7 +22,6 @@ class Server(object):
         self.__server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__server.bind((addr, port))
         self.__server.listen(conn_count)
-
         print(f'Listening: {addr}:{port}')
 
     def send(self, conn, msg: dict) -> None:

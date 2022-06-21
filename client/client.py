@@ -1,7 +1,12 @@
 import socket
 import json
 from Crypto.Util.number import getRandomInteger
-from aes import aes_decrypt, aes_encrypt
+import sys
+import os
+sys.path.append(f"{os.path.split(os.path.realpath(__file__))[0]}/../utils/")
+from AES import aes_encrypt, aes_decrypt
+from RSA import rsa_encrypt
+from CA import ca_sign, ca_verify
 
 class Client(object):
     """客户端套接字封装
