@@ -10,6 +10,22 @@
     + 服务端用自己的RSA私钥，解密出B，也能够得到K
     + 开始正常利用K来AES加密传输信息
 
-![carbon (1)](https://tvax1.sinaimg.cn/large/007YVyKcly1h3gccgf87zj31kw2k2e81.jpg)
++ 为什么能够抵御中间人攻击?
+    + 中间人需要获得A和B才能计算出K，从而解密AES加密的消息
+    + 但是这里服务端引入了RSA公私钥，客户端发送自己的B的时候，会用服务端的RSA的公钥来加密
+        > 由于中间人没有服务器的RSA私钥，所以无法解密得到B
 
-![carbon (2)](https://tva2.sinaimg.cn/large/007YVyKcly1h3gcgo0v9kj31kw2k2e81.jpg)
++ 为什么引入CA实现签名和认证?
+    + 引入一个服务器和客户端都信任的一个实体
+    + 解决中间人冒充服务器，自己构建一组RSA公私钥，诈出客户端的B
+    + 一般来说中间人无法获得CA的签名，所以客户端一旦验证成功，即可确认这个信息来自真实的服务器
+
+# 程序运行截图
+
++ 服务端
+
+    ![carbon (1)](https://tvax1.sinaimg.cn/large/007YVyKcly1h3gccgf87zj31kw2k2e81.jpg)
+
++ 客户端
+
+    ![carbon (2)](https://tva2.sinaimg.cn/large/007YVyKcly1h3gcgo0v9kj31kw2k2e81.jpg)
