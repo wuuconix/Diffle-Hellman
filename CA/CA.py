@@ -1,52 +1,51 @@
 from Crypto.PublicKey import RSA
-import os
 from Crypto.Signature import pkcs1_15
 from Crypto.Hash import MD5
 from Crypto.PublicKey import RSA
 from traitlets import Bool
+import os
 
-class CA(object):
-    """模拟CA
-    """
+PUBLIC_KEY_PATH = "../CA/key/public.pem"
+PRIVATE_KEY_PATH = "../CA/key/private.pem"
+KEY_DIRECTORY_PATH = "../CA/key/"
 
-    def __init__(self):
-        """构造函数 检测目录下有无公私钥 没有则生成"""
-        if not (os.path.exists("public.pem") and os.path.exists("private.pem")):
-            self.__gen_key()
-        self.public_key = RSA.import_key(open("public.pem").read())
-        self.private_key = RSA.import_key(open("private.pem").read())
+def gen_key():
+    """生成RSA公私钥 存储在public.pem和private.pem 并传送给client公钥"""
+    key = RSA.generate(2048)
+    private_key = key.export_key()
+    public_key = key.publickey().export_key()
+    save(PRIVATE_KEY_PATH, private_key)
+    save(PUBLIC_KEY_PATH, public_key)
 
-    def __gen_key(self):
-        """生成RSA公私钥 存储在public.pem和private.pem 并传送给client公钥"""
-        key = RSA.generate(2048)
-        private_key = key.export_key()
-        public_key = key.publickey().export_key()
-        self.__save("private.pem", private_key)
-        self.__save("public.pem", public_key)
-        self.__save("../client/ca-public.pem", public_key)
+def ca_sign(data: bytes) -> bytes:
+    """RSA签名"""
+    if (not os.path.exists(PUBLIC_KEY_PATH) or not os.path.exists(PRIVATE_KEY_PATH)):
+        if (not os.path.exists(KEY_DIRECTORY_PATH)):
+            os.mkdir(KEY_DIRECTORY_PATH)
+        gen_key()
+    private_key = RSA.import_key(open(PRIVATE_KEY_PATH).read())
+    digest = MD5.new(data)
+    signature = pkcs1_15.new(private_key).sign(digest)
+    return signature
 
-    def sign(self, data: bytes) -> bytes:
-        """RSA签名"""
-        key = self.private_key
-        digest = MD5.new(data)
-        signature = pkcs1_15.new(key).sign(digest)
-        return signature
+def ca_verify(data: bytes, signature: bytes) -> Bool:
+    """RSA签名验证"""
+    public_key = RSA.import_key(open(PUBLIC_KEY_PATH).read())
+    digest = MD5.new(data)
+    try:
+        pkcs1_15.new(public_key).verify(digest, signature)
+        return True
+    except (ValueError, TypeError):
+        return False
 
-    def verify(self, data: bytes, signature: bytes) -> Bool:
-        """RSA签名验证"""
-        key = self.public_key
-        digest = MD5.new(data)
-        try:
-            pkcs1_15.new(key).verify(digest, signature)
-            return True
-        except (ValueError, TypeError):
-            return False
+def save(path: str, data: bytes):
+    """写文件操作的简单封装"""
+    file = open(path, "wb")
+    file.write(data)
+    file.close()
 
-    def __save(self, path: str, data: bytes):
-        file = open(path, "wb")
-        file.write(data)
-        file.close()
-    
-if __name__ == '__main__':
-    ca = CA()
-    # print(ca.verify(b"wuuconix", ca.sign(b"wuuconix")))
+def test() -> None:
+    """测试函数"""
+    print(ca_verify(b"wuuconix", ca_sign(b"wuuconix")))
+
+test()
