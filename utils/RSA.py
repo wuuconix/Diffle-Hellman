@@ -2,9 +2,9 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 import os
 
-PUBLIC_KEY_PATH = "key/public.pem"
-PRIVATE_KEY_PATH = "key/private.pem"
-KEY_DIRECTORY_PATH = "key"
+KEY_DIRECTORY_PATH = "../utils/SERVER_KEY"
+PUBLIC_KEY_PATH = f"{KEY_DIRECTORY_PATH}/public.prm"
+PRIVATE_KEY_PATH = f"{KEY_DIRECTORY_PATH}/private.prm"
 
 def gen_key() -> None:
     """RSA生成公私钥"""
@@ -42,4 +42,4 @@ def test() -> None:
     """测试函数"""
     print(rsa_decrypt(rsa_encrypt(b"wuuconix")))
 
-test()
+# test()
