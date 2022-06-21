@@ -26,7 +26,7 @@ class Server(object):
         self.__server.listen(conn_count)
         self.__public_key, self.__private_key = rsa_genkey()
         print(f'Listening: {addr}:{port}\n')
-        print(f"RSA Pulic Key: {self.__public_key.decode()}\n")
+        print(f"RSA Pulic Key:\n{self.__public_key.decode()}\n")
 
     def send(self, conn, msg: dict) -> None:
         """将传入的json对象转化为字节后发送"""
