@@ -89,7 +89,6 @@ class Server(object):
                 "sign": sign
             }
         }
-        print(msg)
         self.send(conn, msg)
         res = self.recv(conn)
         B = res["body"]["B"]

@@ -1,3 +1,4 @@
+from cgi import print_directory
 import socket
 import json
 from Crypto.Util.number import getRandomInteger
@@ -7,6 +8,7 @@ sys.path.append(f"{os.path.split(os.path.realpath(__file__))[0]}/../utils/")
 from AES import aes_encrypt, aes_decrypt
 from RSA import rsa_encrypt
 from CA import ca_sign, ca_verify
+from binascii import hexlify, unhexlify
 
 class Client(object):
     """客户端套接字封装
@@ -62,11 +64,22 @@ class Client(object):
             }
         }
         self.send(msg)
-        print("Waiting For Server P, g, A...\n")
+        print("Waiting For Server P, g, A, pk, sign...\n")
         res = self.recv()
         p, g, A = res["body"]["p"], res["body"]["g"], res["body"]["A"]
+        pk, sign = res["body"]["pk"], res["body"]["sign"]
         print(f"Big Prime P: {p}\n")
         print(f"Server Public Key A: {A}\n")
+        print(f"Server RSA Public Key pk: \n{pk}\n")
+        print(f"CA sign: {sign}\n")
+        input("Type Enter To Verify Sign...\n")
+        pk = pk.encode()
+        sign =  unhexlify(sign.encode())
+        if (ca_verify(pk, sign)):
+            print("Sign Verified!\n")
+        else:
+            print("Sign UnVerified! Exit!\n")
+            exit()
         input("Type Enter To Generate Client Private Key b...\n")
         b = self.__random_integer()
         B = pow(g, b, p)
