@@ -48,4 +48,4 @@ def test() -> None:
     """测试函数"""
     print(ca_verify(b"wuuconix", ca_sign(b"wuuconix")))
 
-test()
+# test()

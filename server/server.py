@@ -1,5 +1,6 @@
 import socket
 import json
+from tokenize import Number
 from Crypto.Util.number import getPrime, getRandomInteger
 import sys
 import os
@@ -7,8 +8,8 @@ from binascii import hexlify, unhexlify
 
 sys.path.append(f"{os.path.split(os.path.realpath(__file__))[0]}/../utils/")
 from AES import aes_encrypt, aes_decrypt
-from RSA import rsa_genkey, rsa_encrypt, rsa_genkey
-from CA import ca_sign, ca_verify
+from RSA import rsa_decrypt, rsa_genkey
+from CA import ca_sign
 
 class Server(object):
     """服务端套接字封装
@@ -23,7 +24,7 @@ class Server(object):
         self.__server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__server.bind((addr, port))
         self.__server.listen(conn_count)
-        self.__private_key, self.__public_key = rsa_genkey()
+        self.__public_key, self.__private_key = rsa_genkey()
         print(f'Listening: {addr}:{port}\n')
         print(f"RSA Pulic Key: {self.__public_key.decode()}\n")
 
@@ -52,7 +53,7 @@ class Server(object):
             plaintext = input("Input Something To Respond: ").encode()
             print("")
             ciphertext = aes_encrypt(plaintext, K)
-            print(f"Ciphertext: {ciphertext.encode()}\n")
+            print(f"Ciphertext: {ciphertext.decode()}\n")
             msg = {
                 "status": 3,
                 "body": {
@@ -92,6 +93,9 @@ class Server(object):
         self.send(conn, msg)
         res = self.recv(conn)
         B = res["body"]["B"]
+        print(f"Client Public Key B (Encryped): {B}\n")
+        input("Type Enter To Decryped B...\n")
+        B = int(rsa_decrypt(unhexlify(B.encode()), self.__private_key).decode())
         print(f"Client Public Key B: {B}\n")
         input("Type Enter To Calcu Final Key K...\n")
         K = pow(B, a, p)

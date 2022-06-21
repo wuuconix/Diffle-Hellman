@@ -1,13 +1,13 @@
-from cgi import print_directory
 import socket
 import json
 from Crypto.Util.number import getRandomInteger
 import sys
 import os
+
 sys.path.append(f"{os.path.split(os.path.realpath(__file__))[0]}/../utils/")
 from AES import aes_encrypt, aes_decrypt
 from RSA import rsa_encrypt
-from CA import ca_sign, ca_verify
+from CA import ca_verify
 from binascii import hexlify, unhexlify
 
 class Client(object):
@@ -80,16 +80,18 @@ class Client(object):
         else:
             print("Sign UnVerified! Exit!\n")
             exit()
-        input("Type Enter To Generate Client Private Key b...\n")
+        input("Type Enter To Generate Client Private Key b And Encrypt it...\n")
         b = self.__random_integer()
         B = pow(g, b, p)
+        encrypt_B = hexlify(rsa_encrypt(str(B).encode(), pk)).decode()
         print(f"Client Private Key b: {b}\n")
         print(f"Client Public Key B: {B}\n")
+        print(f"Client Public Key B (Encryped): {encrypt_B}\n")
         input("Type Enter To Send Client Public Key B To Server...\n")
         msg = {
             "status": 2,
             "body": {
-                "B": B
+                "B": encrypt_B
             }
         }
         self.send(msg)
