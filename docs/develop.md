@@ -27,7 +27,8 @@
         "A": "xxxx",
         "g": "xxxx",
         "p": "xxxx",
-        "pk": "xxxx", //improve下新增，存放 经过CA私钥加密后的服务器的公钥
+        "pk": "xxxx", //improve下新增，存放服务器的RSA公钥
+        "sign": "xxxx" //improve下新增，存放利用CA对服务器公钥的签名
     }
 }
 ```
