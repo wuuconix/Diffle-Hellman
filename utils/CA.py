@@ -5,9 +5,9 @@ from Crypto.PublicKey import RSA
 from traitlets import Bool
 import os
 
-KEY_DIRECTORY_PATH = "../utils/CA_KEY"
-PUBLIC_KEY_PATH = f"{KEY_DIRECTORY_PATH}/public.prm"
-PRIVATE_KEY_PATH = f"{KEY_DIRECTORY_PATH}/private.prm"
+KEY_DIRECTORY_PATH = f"{os.path.split(os.path.realpath(__file__))[0]}/../utils/CA_KEY"
+PUBLIC_KEY_PATH = f"{KEY_DIRECTORY_PATH}/public.pem"
+PRIVATE_KEY_PATH = f"{KEY_DIRECTORY_PATH}/private.pem"
 
 def gen_key():
     """生成RSA公私钥 存储在public.pem和private.pem 并传送给client公钥"""
@@ -48,4 +48,4 @@ def test() -> None:
     """测试函数"""
     print(ca_verify(b"wuuconix", ca_sign(b"wuuconix")))
 
-# test()
+test()

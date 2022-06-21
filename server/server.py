@@ -3,26 +3,29 @@ import json
 from Crypto.Util.number import getPrime, getRandomInteger
 import sys
 import os
+from binascii import hexlify, unhexlify
+
 sys.path.append(f"{os.path.split(os.path.realpath(__file__))[0]}/../utils/")
 from AES import aes_encrypt, aes_decrypt
-from RSA import rsa_encrypt
+from RSA import rsa_genkey, rsa_encrypt, rsa_genkey
 from CA import ca_sign, ca_verify
-
-PUBLIC_KEY_PATH = "key/public.pem"
-PRIVATE_KEY_PATH = "key/private.pem"
 
 class Server(object):
     """服务端套接字封装
 
     Attributes:
         __server: 服务端套接字
+        __public_key: RSA公钥
+        __private_key: RSA私钥
     """
 
     def __init__(self, addr: str, port: int, conn_count: int = 1):
         self.__server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__server.bind((addr, port))
         self.__server.listen(conn_count)
-        print(f'Listening: {addr}:{port}')
+        self.__private_key, self.__public_key = rsa_genkey()
+        print(f'Listening: {addr}:{port}\n')
+        print(f"RSA Pulic Key: {self.__public_key.decode()}\n")
 
     def send(self, conn, msg: dict) -> None:
         """将传入的json对象转化为字节后发送"""
@@ -49,7 +52,7 @@ class Server(object):
             plaintext = input("Input Something To Respond: ").encode()
             print("")
             ciphertext = aes_encrypt(plaintext, K)
-            print(f"Ciphertext: {ciphertext.decode()}\n")
+            print(f"Ciphertext: {ciphertext.encode()}\n")
             msg = {
                 "status": 3,
                 "body": {
@@ -64,23 +67,29 @@ class Server(object):
         msg = self.recv(conn)
         if (msg["status"] == 0):
             print("Got Client Hello\n")
-        input("Type Enter To Generate Big Prime p, Primitve Root g and Server Private Key a...\n")
+        input("Type Enter To Generate Big Prime p, Primitve Root g, Server Private Key a and CA Sign\n")
         p = self.__prime()
         g = self.__primitive_root(p)
         a = self.__random_integer()
         A = pow(g, a, p)
+        sign = ca_sign(self.__public_key)
+        sign = hexlify(sign).decode()
         print(f"Big Prime P: {p}\n")
         print(f"Server Private Key a: {a}\n")
         print(f"Server Public Key A: {A}\n")
+        print(f"CA Sign: {sign}\n")
         input("Type Enter To Send Server Public Key A To Client And Waiting For Client Public Key...\n")
         msg = {
             "status": 1,
             "body": {
                 "p": p,
                 "g": g,
-                "A": A
+                "A": A,
+                "pk": self.__public_key.decode(),
+                "sign": sign
             }
         }
+        print(msg)
         self.send(conn, msg)
         res = self.recv(conn)
         B = res["body"]["B"]

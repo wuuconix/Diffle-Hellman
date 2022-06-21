@@ -25,7 +25,7 @@ class Client(object):
 
     def recv(self) -> bytes:
         """将接受的数据进行转化为json格式"""
-        return json.loads(self.__client.recv(1024).decode())
+        return json.loads(self.__client.recv(3072).decode())
 
     def run(self) -> None:
         """通过DH密钥传输协议进行数据加密传输"""
