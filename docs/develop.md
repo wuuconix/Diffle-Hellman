@@ -19,13 +19,15 @@
 
 2. 服务端向客户端发送密钥
 
+
 ```json
 {
     "status": 1,
     "body": {
         "A": "xxxx",
         "g": "xxxx",
-        "p": "xxxx"
+        "p": "xxxx",
+        "pk": "xxxx", //improve下新增，存放 经过CA私钥加密后的服务器的公钥
     }
 }
 ```
@@ -36,7 +38,7 @@
 {
     "status": 2,
     "body": {
-        "B": "xxxx"
+        "B": "xxxx" //利用服务器的公钥把B进行加密
     }
 }
 ```
