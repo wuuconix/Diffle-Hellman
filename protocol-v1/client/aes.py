@@ -20,4 +20,3 @@ def test() -> None:
     print(ciphertext)
     decrptdata = aes_decrypt(ciphertext, b"wuuconixwuuconix")
     print(decrptdata)
-    
