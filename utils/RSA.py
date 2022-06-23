@@ -7,7 +7,7 @@ def rsa_genkey() -> tuple:
     RETURNS:
         返回两个参数 第一个是公钥 第二个是私钥
     """
-    key = RSA.generate(2048)
+    key = RSA.generate(1024)
     private_key = key.export_key()
     public_key = key.publickey().export_key()
     return public_key, private_key
@@ -31,4 +31,5 @@ def test() -> None:
     public_key, private_key = rsa_genkey()
     print(rsa_decrypt(rsa_encrypt(b"wuuconix", public_key), private_key))
 
-# test()
+if __name__ == "__main__":
+    test()

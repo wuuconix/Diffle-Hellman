@@ -21,4 +21,5 @@ def test() -> None:
     decrptdata = aes_decrypt(ciphertext, b"wuuconixwuuconix")
     print(decrptdata)
 
-# test()
+if __name__ == "__main__":
+    test()
