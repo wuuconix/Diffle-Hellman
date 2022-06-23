@@ -1,13 +1,15 @@
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 
+RSA_KEY_LENGTH = 1400
+
 def rsa_genkey() -> tuple:
     """RSA生成公私钥
 
     RETURNS:
         返回两个参数 第一个是公钥 第二个是私钥
     """
-    key = RSA.generate(1024)
+    key = RSA.generate(RSA_KEY_LENGTH)
     private_key = key.export_key()
     public_key = key.publickey().export_key()
     return public_key, private_key
@@ -29,7 +31,7 @@ def rsa_decrypt(data: bytes, private_key: bytes) -> bytes:
 def test() -> None:
     """测试函数"""
     public_key, private_key = rsa_genkey()
-    print(rsa_decrypt(rsa_encrypt(b"wuuconix", public_key), private_key))
+    print(rsa_decrypt(rsa_encrypt(b'wuuconix', public_key), private_key))
 
 if __name__ == "__main__":
     test()

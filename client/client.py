@@ -4,11 +4,13 @@ from Crypto.Util.number import getRandomInteger
 import sys
 import os
 
-sys.path.append(f"{os.path.split(os.path.realpath(__file__))[0]}/../utils/")
+sys.path.append(f"{os.path.dirname(__file__)}/../utils/")
 from AES import aes_encrypt, aes_decrypt
 from RSA import rsa_encrypt
 from CA import ca_verify
 from binascii import hexlify, unhexlify
+
+COMUNICATION_LENGTH = 1400
 
 class Client(object):
     """客户端套接字封装
@@ -27,7 +29,7 @@ class Client(object):
 
     def recv(self) -> bytes:
         """将接受的数据进行转化为json格式"""
-        return json.loads(self.__client.recv(3072).decode())
+        return json.loads(self.__client.recv(COMUNICATION_LENGTH).decode())
 
     def run(self) -> None:
         """通过DH密钥传输协议进行数据加密传输"""
@@ -36,7 +38,7 @@ class Client(object):
         print("*******Data Communication*******\n")
         while True:
             plaintext = input("Input Something To Send: ").encode()
-            print("")
+            print()
             ciphertext = aes_encrypt(plaintext, K)
             print(f"Ciphertext: {ciphertext.decode()}\n")
             msg = {
@@ -83,6 +85,7 @@ class Client(object):
         input("Type Enter To Generate Client Private Key b And Encrypt it...\n")
         b = self.__random_integer()
         B = pow(g, b, p)
+        print(str(B).encode(), len(str(B).encode()))
         encrypt_B = hexlify(rsa_encrypt(str(B).encode(), pk)).decode()
         print(f"Client Private Key b: {b}\n")
         print(f"Client Public Key B: {B}\n")

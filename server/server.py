@@ -1,15 +1,16 @@
 import socket
 import json
-from tokenize import Number
 from Crypto.Util.number import getPrime, getRandomInteger
 import sys
 import os
 from binascii import hexlify, unhexlify
 
-sys.path.append(f"{os.path.split(os.path.realpath(__file__))[0]}/../utils/")
+sys.path.append(f"{os.path.dirname(__file__)}/../utils/")
 from AES import aes_encrypt, aes_decrypt
 from RSA import rsa_decrypt, rsa_genkey
 from CA import ca_sign
+
+COMUNICATION_LENGTH = 1400
 
 class Server(object):
     """服务端套接字封装
@@ -34,7 +35,7 @@ class Server(object):
 
     def recv(self, conn) -> dict:
         """将接受的数据进行转化为json格式"""
-        msg = json.loads(conn.recv(1024).decode())
+        msg = json.loads(conn.recv(COMUNICATION_LENGTH).decode())
         return msg
 
     def run(self) -> None:
