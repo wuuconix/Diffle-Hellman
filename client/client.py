@@ -21,6 +21,7 @@ class Client(object):
 
     def __init__(self, addr: str, port: int):
         self.__client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.__client.connect((addr, port))
 
     def send(self, msg: dict) -> None:

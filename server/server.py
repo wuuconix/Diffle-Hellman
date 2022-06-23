@@ -23,6 +23,7 @@ class Server(object):
 
     def __init__(self, addr: str, port: int, conn_count: int = 1):
         self.__server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.__server.bind((addr, port))
         self.__server.listen(conn_count)
         self.__public_key, self.__private_key = rsa_genkey()
