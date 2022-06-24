@@ -31,12 +31,18 @@ class Server(object):
         print(f"RSA Pulic Key:\n{self.__public_key.decode()}\n")
 
     def send(self, conn, msg: dict) -> None:
-        """将传入的json对象转化为字节后发送"""
-        conn.send(json.dumps(msg).encode())
+        """将传入的json对象转化为字节后发送
+           利用b'\xff'填充至 COMUNICATION_LENGTH位 的二进制个数
+        """
+        msg_bytes = json.dumps(msg).encode()
+        msg_bytes = msg_bytes + (COMUNICATION_LENGTH - len(msg_bytes)) * b'\xff'
+        conn.send(msg_bytes)
 
     def recv(self, conn) -> dict:
-        """将接受的数据进行转化为json格式"""
-        msg = json.loads(conn.recv(COMUNICATION_LENGTH).decode())
+        """将接受的数据进行转化为json格式
+           利用decode('ascii', 'ignore')忽略最后的填充b'\xff'
+        """
+        msg = json.loads(conn.recv(COMUNICATION_LENGTH).decode('ascii', "ignore"))
         return msg
 
     def run(self) -> None:

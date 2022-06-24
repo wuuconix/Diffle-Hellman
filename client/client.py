@@ -25,12 +25,18 @@ class Client(object):
         self.__client.connect((addr, port))
 
     def send(self, msg: dict) -> None:
-        """将传入的json对象转化为字节后发送"""
-        self.__client.send(json.dumps(msg).encode())
+        """将传入的json对象转化为字节后发送
+           利用b'\xff'填充至 COMUNICATION_LENGTH位 的二进制个数
+        """
+        msg_bytes = json.dumps(msg).encode()
+        msg_bytes = msg_bytes + (COMUNICATION_LENGTH - len(msg_bytes)) * b'\xff'
+        self.__client.send(msg_bytes)
 
     def recv(self) -> bytes:
-        """将接受的数据进行转化为json格式"""
-        return json.loads(self.__client.recv(COMUNICATION_LENGTH).decode())
+        """将接受的数据进行转化为json格式
+           利用decode('ascii', 'ignore')忽略最后的填充b'\xff'
+        """
+        return json.loads(self.__client.recv(COMUNICATION_LENGTH).decode('ascii', "ignore"))
 
     def run(self) -> None:
         """通过DH密钥传输协议进行数据加密传输"""
