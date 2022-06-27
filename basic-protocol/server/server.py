@@ -1,5 +1,7 @@
+from audioop import add
 import socket
 import json
+from traceback import print_tb
 from Crypto.Util.number import getPrime, getRandomInteger
 import sys
 import os
@@ -119,5 +121,9 @@ class Server(object):
         return K
 
 if __name__ == '__main__':
-    server = Server('localhost', 23333)
+    if len(sys.argv) != 3:
+        print("Usage: python3 server.py addr port")
+        exit(0)
+    addr, port = sys.argv[1], sys.argv[2]
+    server = Server(addr, int(port))
     server.run()

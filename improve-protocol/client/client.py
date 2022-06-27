@@ -122,5 +122,10 @@ class Client(object):
         return K
 
 if __name__ == '__main__':
-    client = Client('localhost', 23333)
+    if len(sys.argv) != 3:
+        print("Usage: python3 server.py addr port")
+        exit(0)
+    addr, port = sys.argv[1], sys.argv[2]
+    client = Client(addr, int(port))
     client.run()
+
