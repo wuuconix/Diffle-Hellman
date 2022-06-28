@@ -22,7 +22,7 @@ docker run -itd --name middle -v /root/Diffle-Hellman:/root/Diffle-Hellman wuuco
 # 开启server 服务器容器
 docker run -itd --name server -v /root/Diffle-Hellman:/root/Diffle-Hellman wuuconix/debian-python3
 
-# 开启client 服务器容器
+# 开启client 客户端容器
 docker run -itd --name client -v /root/Diffle-Hellman:/root/Diffle-Hellman wuuconix/debian-python3
 ```
 
