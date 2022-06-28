@@ -219,6 +219,8 @@ class AES:
 
 
 def aes_encrypt(plaintext: bytes, key: bytes) -> bytes:
+    if plaintext == b"":
+        return b""
     key = int(binascii.hexlify(key).decode(), 16)
     plaintext = int(binascii.hexlify(plaintext).decode(), 16)
     aes = AES(key)
@@ -227,6 +229,8 @@ def aes_encrypt(plaintext: bytes, key: bytes) -> bytes:
 
 
 def aes_decrypt(ciphertext: bytes, key: bytes) -> bytes:
+    if ciphertext == b"":
+        return b""
     key = int(binascii.hexlify(key).decode(), 16)
     ciphertext = int(ciphertext.decode(), 16)
     aes = AES(key)
