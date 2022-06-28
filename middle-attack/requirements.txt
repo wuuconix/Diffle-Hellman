@@ -1,0 +1,6 @@
+autopep8==1.6.0
+NetfilterQueue==1.0.0
+pycodestyle==2.8.0
+pycryptodome==3.14.1
+scapy==2.4.5
+toml==0.10.2
