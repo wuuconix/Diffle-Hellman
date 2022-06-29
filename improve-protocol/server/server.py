@@ -2,10 +2,8 @@ import socket
 import json
 from Crypto.Util.number import getPrime, getRandomInteger
 import sys
-import os
 from binascii import hexlify, unhexlify
 
-sys.path.append(f"{os.path.split(os.path.realpath(__file__))[0]}/../utils/")
 from AES import aes_encrypt, aes_decrypt
 from RSA import rsa_decrypt, rsa_genkey
 from CA import ca_sign
