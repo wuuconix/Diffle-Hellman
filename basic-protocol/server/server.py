@@ -114,7 +114,7 @@ class Server(object):
 
     def __key_format(self, K: int) -> bytes:
         K = str(K) #先将K转化为字符
-        K = K[0: 32] #取前32位字符
+        K = K[0: 16] #取前16位字符
         K = K.encode() #转变为bytes类型
         return K
 
