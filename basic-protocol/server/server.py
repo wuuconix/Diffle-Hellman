@@ -4,8 +4,6 @@ import json
 from traceback import print_tb
 from Crypto.Util.number import getPrime, getRandomInteger
 import sys
-import os
-sys.path.append(f"{os.path.split(os.path.realpath(__file__))[0]}/../utils")
 from AES import aes_decrypt, aes_encrypt
 
 COMUNICATION_LENGTH = 1400
