@@ -76,16 +76,34 @@ docker run -itd --name client -v /root/Diffle-Hellman:/root/Diffle-Hellman wuuco
     python3 /root/Diffle-Hellman/middle-attack/middle.py
 
 # 终端3
-    # 进入server容器
-    docker exec -it server bash
+    # 以特权身份进入server容器
+    docker exec -it --privileged server bash
     # 运行服务
     python3 /root/Diffle-Hellman/basic-protocol/server/server.py 0.0.0.0 23333
 
 # 终端4
-    # 进入client容器
-    docker exec -it client bash
+    # 以特权身份进入client容器
+    docker exec -it --privileged client bash
     # 运行客户端
     python3 /root/Diffle-Hellman/basic-protocol/client/client.py 172.17.0.3 23333
 ```
 
 ![image](https://tva2.sinaimg.cn/large/007YVyKcly1h3o05palq8j31hc0u0noc.jpg)
+
+查看arp欺骗的结果
+
++ 正常情况
+
+    172.17.0.3 即服务器的mac地址为 02:42:ac:11:00:03
+
+    ![image](https://tvax2.sinaimg.cn/large/007YVyKcly1h3qqsl5b7uj30k602mwfh.jpg)
+
++ arp欺骗后
+
+    服务器的mac地址被欺骗为了 02:42:ac:11:00:02
+
+    ![image](https://tvax1.sinaimg.cn/large/007YVyKcly1h3qqszcz8lj30k202l75i.jpg)
+
++ 攻击结束后如何恢复arp表?
+
+    `arp -d 172.17.0.3` 删除arp表中的记录即可
