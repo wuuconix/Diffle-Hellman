@@ -40,7 +40,6 @@ InvSbox = (
 )
 
 
-# learnt from http://cs.ucsb.edu/~koc/cs178/projects/JT/aes.c
 def xtime(a): return (((a << 1) ^ 0x1B) & 0xFF) if (a & 0x80) else (a << 1)
 
 
@@ -53,6 +52,7 @@ Rcon = (
 
 
 def text2matrix(text):
+    """整形转化为矩阵, 方便计算"""
     matrix = []
     for i in range(16):
         byte = (text >> (8 * (15 - i))) & 0xFF
@@ -64,6 +64,7 @@ def text2matrix(text):
 
 
 def matrix2text(matrix):
+    """矩阵转化为整形"""
     text = 0
     for i in range(4):
         for j in range(4):
@@ -81,8 +82,8 @@ class AES:
         self.change_key(master_key)
 
     def change_key(self, master_key):
+        """轮密钥生成"""
         self.round_keys = text2matrix(master_key)
-        # print self.round_keys
 
         for i in range(4, 4 * 11):
             self.round_keys.append([])
@@ -103,31 +104,41 @@ class AES:
                     self.round_keys[i].append(byte)
 
     def encrypt_ecb(self, plaintext):
+        """aes加密 ECB模式"""
         self.plain_state = text2matrix(plaintext)
 
+        # 轮密钥加
         self.__add_round_key(self.plain_state, self.round_keys[:4])
 
         for i in range(1, 10):
             self.__round_encrypt(
                 self.plain_state, self.round_keys[4 * i: 4 * (i + 1)])
 
+        # 字节替换
         self.__sub_bytes(self.plain_state)
+        # 行移位
         self.__shift_rows(self.plain_state)
+        # 轮密钥加
         self.__add_round_key(self.plain_state, self.round_keys[40:])
 
         return matrix2text(self.plain_state)
 
     def decrypt_ecb(self, ciphertext):
+        """aes解密 ECB模式"""
         self.cipher_state = text2matrix(ciphertext)
 
+        # 轮密钥加
         self.__add_round_key(self.cipher_state, self.round_keys[40:])
+        # 逆行移位
         self.__inv_shift_rows(self.cipher_state)
+        # 逆字节替换
         self.__inv_sub_bytes(self.cipher_state)
 
         for i in range(9, 0, -1):
             self.__round_decrypt(
                 self.cipher_state, self.round_keys[4 * i: 4 * (i + 1)])
 
+        # 轮密钥加
         self.__add_round_key(self.cipher_state, self.round_keys[:4])
 
         return matrix2text(self.cipher_state)
@@ -158,43 +169,51 @@ class AES:
         return self.encrypt_ctr(ciphertext, iv)
 
     def __add_round_key(self, s, k):
+        """轮密钥加"""
         for i in range(4):
             for j in range(4):
                 s[i][j] ^= k[i][j]
 
     def __round_encrypt(self, state_matrix, key_matrix):
-        self.__sub_bytes(state_matrix)
-        self.__shift_rows(state_matrix)
-        self.__mix_columns(state_matrix)
-        self.__add_round_key(state_matrix, key_matrix)
+        """一轮加密变换"""
+        self.__sub_bytes(state_matrix) # 字节替换
+        self.__shift_rows(state_matrix) # 行移位
+        self.__mix_columns(state_matrix) # 列混合
+        self.__add_round_key(state_matrix, key_matrix) # 轮密钥加
 
     def __round_decrypt(self, state_matrix, key_matrix):
-        self.__add_round_key(state_matrix, key_matrix)
-        self.__inv_mix_columns(state_matrix)
-        self.__inv_shift_rows(state_matrix)
-        self.__inv_sub_bytes(state_matrix)
+        """一轮逆加密变换"""
+        self.__add_round_key(state_matrix, key_matrix) # 轮密钥加
+        self.__inv_mix_columns(state_matrix) # 逆列混合
+        self.__inv_shift_rows(state_matrix) # 逆行移位
+        self.__inv_sub_bytes(state_matrix) # 逆字节替换
 
     def __sub_bytes(self, s):
+        """字节替换"""
         for i in range(4):
             for j in range(4):
                 s[i][j] = Sbox[s[i][j]]
 
     def __inv_sub_bytes(self, s):
+        """逆字节替换"""
         for i in range(4):
             for j in range(4):
                 s[i][j] = InvSbox[s[i][j]]
 
     def __shift_rows(self, s):
+        """行移位"""
         s[0][1], s[1][1], s[2][1], s[3][1] = s[1][1], s[2][1], s[3][1], s[0][1]
         s[0][2], s[1][2], s[2][2], s[3][2] = s[2][2], s[3][2], s[0][2], s[1][2]
         s[0][3], s[1][3], s[2][3], s[3][3] = s[3][3], s[0][3], s[1][3], s[2][3]
 
     def __inv_shift_rows(self, s):
+        """逆行移位"""
         s[0][1], s[1][1], s[2][1], s[3][1] = s[3][1], s[0][1], s[1][1], s[2][1]
         s[0][2], s[1][2], s[2][2], s[3][2] = s[2][2], s[3][2], s[0][2], s[1][2]
         s[0][3], s[1][3], s[2][3], s[3][3] = s[1][3], s[2][3], s[3][3], s[0][3]
 
     def __mix_single_column(self, a):
+        """单个列混合"""
         t = a[0] ^ a[1] ^ a[2] ^ a[3]
         u = a[0]
         a[0] ^= t ^ xtime(a[0] ^ a[1])
@@ -203,10 +222,12 @@ class AES:
         a[3] ^= t ^ xtime(a[3] ^ u)
 
     def __mix_columns(self, s):
+        """列混合"""
         for i in range(4):
             self.__mix_single_column(s[i])
 
     def __inv_mix_columns(self, s):
+        """逆列混合"""
         for i in range(4):
             u = xtime(xtime(s[i][0] ^ s[i][2]))
             v = xtime(xtime(s[i][1] ^ s[i][3]))
@@ -219,6 +240,7 @@ class AES:
 
 
 def aes_encrypt(plaintext: bytes, key: bytes) -> bytes:
+    """aes加密方法封装"""
     if plaintext == b"":
         return b""
     key = int(binascii.hexlify(key).decode(), 16)
@@ -229,6 +251,7 @@ def aes_encrypt(plaintext: bytes, key: bytes) -> bytes:
 
 
 def aes_decrypt(ciphertext: bytes, key: bytes) -> bytes:
+    """aes解密方法封装"""
     if ciphertext == b"":
         return b""
     key = int(binascii.hexlify(key).decode(), 16)
