@@ -2,10 +2,9 @@ import socket
 import json
 from Crypto.Util.number import getPrime, getRandomInteger
 import sys
-from binascii import hexlify, unhexlify
+from binascii import hexlify
 
 from AES import aes_encrypt, aes_decrypt
-from RSA import rsa_decrypt, rsa_genkey
 from CA import ca_sign
 
 COMUNICATION_LENGTH = 1400
@@ -24,9 +23,7 @@ class Server(object):
         self.__server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.__server.bind((addr, port))
         self.__server.listen(conn_count)
-        self.__public_key, self.__private_key = rsa_genkey()
         print(f'Listening: {addr}:{port}\n')
-        print(f"RSA Pulic Key:\n{self.__public_key.decode()}\n")
 
     def send(self, conn, msg: dict) -> None:
         """将传入的json对象转化为字节后发送
@@ -79,7 +76,7 @@ class Server(object):
         g = self.__primitive_root(p)
         a = self.__random_integer()
         A = pow(g, a, p)
-        sign = ca_sign(self.__public_key)
+        sign = ca_sign(str(A).encode("utf-8"))
         sign = hexlify(sign).decode()
         print(f"Big Prime P: {p}\n")
         print(f"Server Private Key a: {a}\n")
@@ -92,16 +89,12 @@ class Server(object):
                 "p": p,
                 "g": g,
                 "A": A,
-                "pk": self.__public_key.decode(),
                 "sign": sign
             }
         }
         self.send(conn, msg)
         res = self.recv(conn)
-        B = res["body"]["B"]
-        print(f"Client Public Key B (Encryped): {B}\n")
-        input("Type Enter To Decryped B...\n")
-        B = int(rsa_decrypt(unhexlify(B.encode()), self.__private_key).decode())
+        B = int(res["body"]["B"])
         print(f"Client Public Key B: {B}\n")
         input("Type Enter To Calcu Final Key K...\n")
         K = pow(B, a, p)

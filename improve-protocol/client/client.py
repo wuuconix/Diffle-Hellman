@@ -4,9 +4,8 @@ from Crypto.Util.number import getRandomInteger
 import sys
 
 from AES import aes_encrypt, aes_decrypt
-from RSA import rsa_encrypt
 from CA import ca_verify
-from binascii import hexlify, unhexlify
+from binascii import unhexlify
 
 COMUNICATION_LENGTH = 1400
 
@@ -73,16 +72,13 @@ class Client(object):
         self.send(msg)
         print("Waiting For Server P, g, A, pk, sign...\n")
         res = self.recv()
-        p, g, A = res["body"]["p"], res["body"]["g"], res["body"]["A"]
-        pk, sign = res["body"]["pk"], res["body"]["sign"]
+        p, g, A, sign = res["body"]["p"], res["body"]["g"], res["body"]["A"], res["body"]["sign"]
         print(f"Big Prime P: {p}\n")
         print(f"Server Public Key A: {A}\n")
-        print(f"Server RSA Public Key pk: \n{pk}\n")
         print(f"CA sign: {sign}\n")
         input("Type Enter To Verify Sign...\n")
-        pk = pk.encode()
-        sign =  unhexlify(sign.encode())
-        if (ca_verify(pk, sign)):
+        sign = unhexlify(sign.encode())
+        if (ca_verify(str(A).encode("utf-8"), sign)):
             print("Sign Verified!\n")
         else:
             print("Sign UnVerified! Exit!\n")
@@ -90,16 +86,13 @@ class Client(object):
         input("Type Enter To Generate Client Private Key b And Encrypt it...\n")
         b = self.__random_integer()
         B = pow(g, b, p)
-        print(str(B).encode(), len(str(B).encode()))
-        encrypt_B = hexlify(rsa_encrypt(str(B).encode(), pk)).decode()
         print(f"Client Private Key b: {b}\n")
         print(f"Client Public Key B: {B}\n")
-        print(f"Client Public Key B (Encryped): {encrypt_B}\n")
         input("Type Enter To Send Client Public Key B To Server...\n")
         msg = {
             "status": 2,
             "body": {
-                "B": encrypt_B
+                "B": B
             }
         }
         self.send(msg)

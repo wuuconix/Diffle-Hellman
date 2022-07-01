@@ -27,8 +27,7 @@
         "A": "xxxx",
         "g": "xxxx",
         "p": "xxxx",
-        "pk": "xxxx", //improve下新增，存放服务器的RSA公钥
-        "sign": "xxxx" //improve下新增，存放利用CA对服务器公钥的签名
+        "sign": "xxxx" //improve下新增，存放利用CA对A的签名
     }
 }
 ```
@@ -39,7 +38,7 @@
 {
     "status": 2,
     "body": {
-        "B": "xxxx" //improve修改语义 利用服务器的公钥把B进行加密
+        "B": "xxxx"
     }
 }
 ```
